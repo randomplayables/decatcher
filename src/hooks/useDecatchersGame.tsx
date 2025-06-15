@@ -3,7 +3,6 @@ import { jStat } from 'jstat';
 import { EQUATIONS } from '../utils/equations';
 import { isCatch } from '../utils/simulation';
 import {
-  DifferentialEquation,
   Distribution,
   Slit,
   SimulationConfig,
@@ -43,56 +42,64 @@ const INITIAL_STATE: GameState = {
 export function useDecatchersGame() {
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
   const [slit, setSlit] = useState<Slit>({ x: 5, y: 0, width: 10 });
-  const [session, setSession] = useState<any>(null);
 
-  const startSimulation = useCallback(async (config: SimulationConfig) => {
-    setGameState({ ...INITIAL_STATE, isSetup: false, isSimulating: true, config });
-    
-    // Initialize session with the platform
-    const gameSession = await apiService.initGameSession();
-    setSession(gameSession);
+  const startSimulation = useCallback((config: SimulationConfig) => {
+    // Set state to "simulating" and clear previous results
+    setGameState(prev => ({ 
+      ...prev, 
+      isSetup: false, 
+      isSimulating: true, 
+      isFinished: false,
+      config,
+      results: null 
+    }));
 
-    const equation = EQUATIONS.find((e) => e.id === config.equationId);
-    const distribution = DISTRIBUTIONS.find((d) => d.id === config.distributionId);
+    // Run the simulation in a timeout to avoid blocking UI updates
+    setTimeout(async () => {
+        const gameSession = await apiService.initGameSession();
 
-    if (!equation || !distribution) {
-      console.error('Invalid equation or distribution');
-      setGameState(INITIAL_STATE);
-      return;
-    }
+        const equation = EQUATIONS.find((e) => e.id === config.equationId);
+        const distribution = DISTRIBUTIONS.find((d) => d.id === config.distributionId);
 
-    let catchCount = 0;
-    for (let i = 0; i < config.numThrows; i++) {
-      const constant = distribution.sample(...config.distributionParams);
-      if (isCatch(equation, constant, slit)) {
-        catchCount++;
-      }
-    }
+        if (!equation || !distribution) {
+        console.error('Invalid equation or distribution');
+        setGameState(INITIAL_STATE);
+        return;
+        }
 
-    const catchProportion = config.numThrows > 0 ? catchCount / config.numThrows : 0;
-    const score = slit.width > 0 ? catchProportion / slit.width : 0;
-    
-    const results = {
-        catches: catchCount,
-        catchProportion,
-        score,
-    };
+        let catchCount = 0;
+        for (let i = 0; i < config.numThrows; i++) {
+        const constant = distribution.sample(...config.distributionParams);
+        if (isCatch(equation, constant, slit)) {
+            catchCount++;
+        }
+        }
 
-    setGameState((prev) => ({ ...prev, isSimulating: false, isFinished: true, results }));
+        const catchProportion = config.numThrows > 0 ? catchCount / config.numThrows : 0;
+        const score = slit.width > 0 ? catchProportion / slit.width : 0;
+        
+        const results = {
+            catches: catchCount,
+            catchProportion,
+            score,
+        };
 
-    // Save data to the platform
-    apiService.saveGameData(gameSession, {
-        config,
-        slit,
-        results
-    });
+        // Set the final "finished" state with the results
+        setGameState((prev) => ({ ...prev, isSimulating: false, isFinished: true, results }));
+
+        // Save data to the platform
+        apiService.saveGameData(gameSession, {
+            config,
+            slit,
+            results
+        });
+    }, 10); // A small delay is enough for the UI to update
 
   }, [slit]);
 
   const resetGame = useCallback(() => {
     setGameState(INITIAL_STATE);
     setSlit({ x: 5, y: 0, width: 10 });
-    setSession(null);
   }, []);
 
   return {

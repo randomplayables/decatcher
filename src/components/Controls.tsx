@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { useDecatchersGame } from '../hooks/useDecatchersGame';
-import { Slit, SimulationConfig } from '../types';
+import { Slit, SimulationConfig, DifferentialEquation, Distribution } from '../types';
 
 interface ControlsProps {
   slit: Slit;
   onSlitChange: (newSlit: Slit) => void;
   onStart: (config: SimulationConfig) => void;
   isSimulating: boolean;
+  equations: DifferentialEquation[];
+  distributions: Distribution[];
 }
 
-export const Controls: React.FC<ControlsProps> = ({ slit, onSlitChange, onStart, isSimulating }) => {
-  const { equations, distributions } = useDecatchersGame();
+export const Controls: React.FC<ControlsProps> = ({ slit, onSlitChange, onStart, isSimulating, equations, distributions }) => {
   const [config, setConfig] = useState<SimulationConfig>({
     equationId: equations[0].id,
     distributionId: distributions[0].id,

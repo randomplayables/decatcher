@@ -42,6 +42,7 @@ export const Visualization: React.FC<VisualizationProps> = ({ equation, slit, co
         showlegend: false,
         xaxis: { range: [-10, 10] },
         yaxis: { range: [-50, 50] },
+        autosize: true,
         shapes: [
           // The slit
           {
@@ -55,7 +56,7 @@ export const Visualization: React.FC<VisualizationProps> = ({ equation, slit, co
           },
         ],
       }}
-      style={{ width: '100%', height: '500px' }}
+      style={{ width: '100%', height: '100%' }}
       config={{ responsive: true }}
     />
   );

@@ -17,19 +17,19 @@ header h1 {
 }
 
 main {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
 @media (min-width: 1024px) {
   main {
-    flex-direction: row;
+    grid-template-columns: 2fr 1fr;
+    min-height: 550px;
   }
 }
 
 .visualization-container {
-  flex: 2;
   min-width: 0;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -37,7 +37,6 @@ main {
 }
 
 .controls-container {
-  flex: 1;
   min-width: 300px;
 }
 
@@ -49,6 +48,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: 100%;
 }
 
 .control-group h4 {

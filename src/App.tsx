@@ -12,6 +12,8 @@ function App() {
     setSlit,
     startSimulation,
     resetGame,
+    equations,
+    distributions,
   } = useDecatchersGame();
 
   const selectedEquation = EQUATIONS.find(e => e.id === gameState.config?.equationId);
@@ -35,6 +37,8 @@ function App() {
                 onSlitChange={setSlit}
                 onStart={startSimulation}
                 isSimulating={gameState.isSimulating}
+                equations={equations}
+                distributions={distributions}
             />
           )}
         </div>
